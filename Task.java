@@ -4,6 +4,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.LinkedList;
 
 public class Task
 {
@@ -25,7 +26,9 @@ public class Task
 
 		ArrayList<Node>[] arrList = new ArrayList[Integer.parseInt(tarefas_regras_hardWeeks[0])];
 
-		ArrayList<Node>[] arrNode = new ArrayList[Integer.parseInt(tarefas_regras_hardWeeks[0])]; //obviamente tem de ser melhorado
+		ArrayList<Node>[] arrNode = new ArrayList[Integer.parseInt(tarefas_regras_hardWeeks[0])];
+
+		Queue<Node> queue = new LinkedList<>();
 
 		for (int i = 0; i < Integer.parseInt(tarefas_regras_hardWeeks[0]); i++)
 		{
@@ -47,14 +50,39 @@ public class Task
 			arrList[Integer.parseInt(regras[1])].get(0).antecedentes++;
 		}
 
+		for (int i = 0; i < Integer.parseInt(tarefas_regras_hardWeeks[0]); i++)
+		{
+			if (arrList[i].get(0).antecedentes == 0)
+				queue.add(arrList[i].remove(0));
+		}
+
+		while (!queue.isEmpty())
+		{
+			Node atual = queue.poll();
+
+			atual.week++;
+			
+			while (arrList[atual.valor].size() > 0)
+			{
+				Node removido = arrList[atual.valor].remove(0);
+				removido.week = atual.week;
+				removido.antecedentes--;
+
+				if (removido.antecedentes == 0)
+					queue.add(removido);
+			}
+
+			arrNode[atual.week].add(atual);
+		}
+
+		/*
+		//FUNCIONA MAS DÁ TIME LIMIT
 		for (int k = 0; k < Integer.parseInt(tarefas_regras_hardWeeks[0]); k++)
 		{
 			for (int i = 0; i < arrList.length; i++)
 			{
 				if (arrList[i].size() > 0 && arrList[i].get(0).antecedentes == 0)
-				{
 					arrNode[k].add(arrList[i].remove(0));
-				}
 			}
 
 			for (int i = 0; i < arrNode[k].size(); i++)
@@ -65,9 +93,9 @@ public class Task
 					elemento.antecedentes--;
 				}
 			}
-		}
+		}*/
 
-		int bad_weeks = 0, count_worstess_week = 0;
+		int bad_weeks = 0, count_worstest_week = 0;
 
 		for (int i = 0; i < arrNode.length; i++)
 		{
@@ -85,12 +113,23 @@ public class Task
 			{
 				bad_weeks++;
 
-				if (arrNode[i].size() > count_worstess_week)
-					count_worstess_week = arrNode[i].size();
+				if (arrNode[i].size() > count_worstest_week)
+					count_worstest_week = arrNode[i].size();
 			}
 		}
 
-		System.out.println(count_worstess_week + " " + bad_weeks);
+		/*System.out.println("30000 300000 1");
+		for (int i = 0; i < arrNode.length; i++)
+		{
+			for (int j = i + 1; j < arrNode.length; j++)
+			{
+				System.out.println(i + " " + j);
+			}
+
+			
+		}*/
+
+		System.out.println(count_worstest_week + " " + bad_weeks);
 	}
 }
 
