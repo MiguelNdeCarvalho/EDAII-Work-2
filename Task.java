@@ -1,10 +1,7 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.PriorityQueue;
-import java.util.Queue;
-import java.util.LinkedList;
+import java.util.*;
 
 public class Task
 {
@@ -28,18 +25,18 @@ public class Task
 
 		ArrayList<Node>[] arrNode = new ArrayList[Integer.parseInt(tarefas_regras_hardWeeks[0])];
 
-		Queue<Node> queue = new LinkedList<>();
+		Stack<Node> stack = new Stack<Node>();
 
 		for (int i = 0; i < Integer.parseInt(tarefas_regras_hardWeeks[0]); i++)
 		{
 			arrList[i] = new ArrayList<Node>();
 			arrNode[i] = new ArrayList<Node>();
 
-			Node node_list = new Node();
+			Node node = new Node();
 
-			node_list.setValores(i);
+			node.setValores(i);
 
-			arrList[i].add(node_list);
+			arrList[i].add(node);
 		}
 
 		for (int i = 0; i < Integer.parseInt(tarefas_regras_hardWeeks[1]); i++)
@@ -53,12 +50,27 @@ public class Task
 		for (int i = 0; i < Integer.parseInt(tarefas_regras_hardWeeks[0]); i++)
 		{
 			if (arrList[i].get(0).antecedentes == 0)
-				queue.add(arrList[i].remove(0));
+				stack.push(arrList[i].get(0));
 		}
 
-		while (!queue.isEmpty())
+		//Wrong answer
+		while (!stack.isEmpty())
 		{
-			Node atual = queue.poll();
+			/*int i=0;
+			while(queue.peek().antecedentes != 0)
+			{
+				i++;
+				System.out.println(i);
+				order(queue);
+			}*/
+
+			/*for (Node elemento: queue)
+			{
+				System.out.println("no: " + elemento.valor + " week: " + elemento.week + " antecedentes: " + elemento.antecedentes);
+			}*/
+			//System.out.println();
+			Node atual = stack.pop();
+			arrList[atual.valor].remove(0);
 
 			atual.week++;
 			
@@ -67,16 +79,26 @@ public class Task
 				Node removido = arrList[atual.valor].remove(0);
 				removido.week = atual.week;
 				removido.antecedentes--;
+				//System.out.println("nó removido: " + removido.valor + " com " + removido.antecedentes + " antecedentes e incrementou para a semana: " + (atual.week+1) + "\n");
 
 				if (removido.antecedentes == 0)
-					queue.add(removido);
+					stack.push(removido);
 			}
 
+			//System.out.println("no: " + atual.valor + " na semana: " + (atual.week+1));
 			arrNode[atual.week].add(atual);
+			
+			/*for (int i = 0; i < arrNode.length && arrNode[i].size() > 0; i++)
+			{
+				System.out.print("week " + (i + 1) + ": " );
+				for (int j = 0; j < arrNode[i].size(); j++)
+					System.out.print(arrNode[i].get(j).valor + "(" + (arrNode[i].get(j).week+1) +") ");
+				System.out.println();
+			}*/
 		}
 
 		/*
-		//FUNCIONA MAS DÁ TIME LIMIT
+		//Time limit
 		for (int k = 0; k < Integer.parseInt(tarefas_regras_hardWeeks[0]); k++)
 		{
 			for (int i = 0; i < arrList.length; i++)
@@ -97,17 +119,12 @@ public class Task
 
 		int bad_weeks = 0, count_worstest_week = 0;
 
-		for (int i = 0; i < arrNode.length; i++)
-		{
-			/*System.out.print("dia " + (i + 1) + ": " );
+		for (int i = 0; i < arrNode.length && arrNode[i].size() > 0; i++)
+		{		
+			/*System.out.print("week " + (i + 1) + ": " );
 			for (int j = 0; j < arrNode[i].size(); j++)
-			{
-				System.out.print(arrNode[i].get(j).valor + " ");
-			}
-
+				System.out.print(arrNode[i].get(j).valor + "(" + (arrNode[i].get(j).week+1) +") ");
 			System.out.println();*/
-
-
 
 			if (arrNode[i].size() > Integer.parseInt(tarefas_regras_hardWeeks[2]))
 			{
@@ -117,20 +134,26 @@ public class Task
 					count_worstest_week = arrNode[i].size();
 			}
 		}
-
-		/*System.out.println("30000 300000 1");
-		for (int i = 0; i < arrNode.length; i++)
-		{
-			for (int j = i + 1; j < arrNode.length; j++)
-			{
-				System.out.println(i + " " + j);
-			}
-
-			
-		}*/
-
 		System.out.println(count_worstest_week + " " + bad_weeks);
 	}
+
+	/*public static void order(PriorityQueue<Node> queue)
+	{
+		queue.add(queue.remove());
+	}*/
 }
 
-//usar uma praory queue na linha 11 do slide 98 do powerpoint 7
+/*class NodeComparation implements Comparator<Node>
+{
+	public int compare (Node n, Node v)
+	{
+		//Arrays.sort(queue, (a,b) -> {return a.antecedentes < b.antecedentes ? -1 : a.antecedentes > b.antecedentes ? 1 : 0;})
+		if(n.antecedentes < v.antecedentes)
+			return -1;
+		else
+			return 1;
+	}
+}*/
+
+//usar uma priority queue na linha 11 do slide 98 do powerpoint 7
+//o prof falou em heapsort
