@@ -11,149 +11,108 @@ public class Task
 		//declarar um buffer para puder ler inputs
 		BufferedReader buffer = new BufferedReader(new InputStreamReader(System.in));
 		
-		//ler o numero de tarefas existemtes e num de regras
-		String[] tarefas_regras_hardWeeks = buffer.readLine().split(" ");
+		//ler o num de tarefas existemtes, num de regras e significado de uma semana má
+		String[] tarefasRegrasHardWeeks = buffer.readLine().split(" ");
 
-		if (2 > Integer.parseInt(tarefas_regras_hardWeeks[0]) && Integer.parseInt(tarefas_regras_hardWeeks[0]) < 30000) return;
+		//limites do programa
+		//2 <= num de tarefas <= 30 000
+		//1 <= num regras <= 300 000
+		//1 <= sig má semana <= num de tarefas
+		if (Integer.parseInt(tarefasRegrasHardWeeks[0]) < 2 || Integer.parseInt(tarefasRegrasHardWeeks[0]) > 30000) return;
 
-		if (1 > Integer.parseInt(tarefas_regras_hardWeeks[1]) && Integer.parseInt(tarefas_regras_hardWeeks[1]) < 3000000) return;
+		if (Integer.parseInt(tarefasRegrasHardWeeks[1]) < 1 || Integer.parseInt(tarefasRegrasHardWeeks[1]) > 3000000) return;
 
-		if (1 > Integer.parseInt(tarefas_regras_hardWeeks[2]) && Integer.parseInt(tarefas_regras_hardWeeks[2]) < Integer.parseInt(tarefas_regras_hardWeeks[0])) return;
+		if (Integer.parseInt(tarefasRegrasHardWeeks[2]) < 1 || Integer.parseInt(tarefasRegrasHardWeeks[2]) >= Integer.parseInt(tarefasRegrasHardWeeks[0])) return;
 
+		//declarar lista de adjacencias e pilha
+		//a primeira é a lista de adjacencias representar o grafo
+		//em ultimo temos a fila
+		ArrayList<Node>[] tarefasPrecedencias = new ArrayList[Integer.parseInt(tarefasRegrasHardWeeks[0])];
 
-		ArrayList<Node>[] arrList = new ArrayList[Integer.parseInt(tarefas_regras_hardWeeks[0])];
+		Queue<Node> queue = new LinkedList<Node>();
 
-		ArrayList<Node>[] arrNode = new ArrayList[Integer.parseInt(tarefas_regras_hardWeeks[0])];
-
-		Stack<Node> stack = new Stack<Node>();
-
-		for (int i = 0; i < Integer.parseInt(tarefas_regras_hardWeeks[0]); i++)
+		//criação dos nós para o grafo
+		for (int i = 0; i < Integer.parseInt(tarefasRegrasHardWeeks[0]); i++)
 		{
-			arrList[i] = new ArrayList<Node>();
-			arrNode[i] = new ArrayList<Node>();
+			//criar uma lista para guardar todos as adjacencias
+			tarefasPrecedencias[i] = new ArrayList<Node>();
 
+			//criar o nó
 			Node node = new Node();
 
+			//atribuir valores ao nó
 			node.setValores(i);
 
-			arrList[i].add(node);
+			//add o nó à lista, onde o primeiro elemento tem de ser lido primeiro que todos os seus precedentes
+			tarefasPrecedencias[i].add(node);
 		}
 
-		for (int i = 0; i < Integer.parseInt(tarefas_regras_hardWeeks[1]); i++)
+		//criação do grafo
+		for (int i = 0; i < Integer.parseInt(tarefasRegrasHardWeeks[1]); i++)
 		{
+			//ler a intrepetação do arco (u,v)
 			String[] regras = buffer.readLine().split(" ");
 
-			arrList[Integer.parseInt(regras[0])].add(arrList[Integer.parseInt(regras[1])].get(0));
-			arrList[Integer.parseInt(regras[1])].get(0).antecedentes++;
+			//indicar que o arco tem um sentido de u para v e em seguida indica que o nó v tem um antecessor
+			tarefasPrecedencias[Integer.parseInt(regras[0])].add(tarefasPrecedencias[Integer.parseInt(regras[1])].get(0));
+			tarefasPrecedencias[Integer.parseInt(regras[1])].get(0).antecessor++;
 		}
 
-		for (int i = 0; i < Integer.parseInt(tarefas_regras_hardWeeks[0]); i++)
+		//verificar quais sao os nós que nao tem adjacencias e coloca na fila
+		for (int i = 0; i < Integer.parseInt(tarefasRegrasHardWeeks[0]); i++)
 		{
-			if (arrList[i].get(0).antecedentes == 0)
-				stack.push(arrList[i].get(0));
+			if (tarefasPrecedencias[i].get(0).antecessor == 0)
+			{
+				tarefasPrecedencias[i].get(0).week++;
+				queue.add(tarefasPrecedencias[i].get(0));
+			}
 		}
+
+		int badWeeks = 0, countWorstestWeek = 0, semana = 0;
 
 		//Wrong answer
-		while (!stack.isEmpty())
+		//enquanto a fila nao tiver vazio vai sempre lendo o que está na fila
+		while (!queue.isEmpty())
 		{
-			/*int i=0;
-			while(queue.peek().antecedentes != 0)
+			//quando achar a comparação significa que existe todas as tarefas dessa semana
+			if (queue.peek().week == semana)
 			{
-				i++;
-				System.out.println(i);
-				order(queue);
-			}*/
+				//ve quantas tarefas existem para fazer nessa semana (tamanho da queue)
+				int size = queue.size();
 
-			/*for (Node elemento: queue)
-			{
-				System.out.println("no: " + elemento.valor + " week: " + elemento.week + " antecedentes: " + elemento.antecedentes);
-			}*/
-			//System.out.println();
-			Node atual = stack.pop();
-			arrList[atual.valor].remove(0);
-
-			atual.week++;
-			
-			while (arrList[atual.valor].size() > 0)
-			{
-				Node removido = arrList[atual.valor].remove(0);
-				removido.week = atual.week;
-				removido.antecedentes--;
-				//System.out.println("nó removido: " + removido.valor + " com " + removido.antecedentes + " antecedentes e incrementou para a semana: " + (atual.week+1) + "\n");
-
-				if (removido.antecedentes == 0)
-					stack.push(removido);
-			}
-
-			//System.out.println("no: " + atual.valor + " na semana: " + (atual.week+1));
-			arrNode[atual.week].add(atual);
-			
-			/*for (int i = 0; i < arrNode.length && arrNode[i].size() > 0; i++)
-			{
-				System.out.print("week " + (i + 1) + ": " );
-				for (int j = 0; j < arrNode[i].size(); j++)
-					System.out.print(arrNode[i].get(j).valor + "(" + (arrNode[i].get(j).week+1) +") ");
-				System.out.println();
-			}*/
-		}
-
-		/*
-		//Time limit
-		for (int k = 0; k < Integer.parseInt(tarefas_regras_hardWeeks[0]); k++)
-		{
-			for (int i = 0; i < arrList.length; i++)
-			{
-				if (arrList[i].size() > 0 && arrList[i].get(0).antecedentes == 0)
-					arrNode[k].add(arrList[i].remove(0));
-			}
-
-			for (int i = 0; i < arrNode[k].size(); i++)
-			{
-				while(!arrList[arrNode[k].get(i).valor].isEmpty())
+				//verificar se as tarefas que existem sao maior que o numero que tem o significado de uma semana má
+				if (size > Integer.parseInt(tarefasRegrasHardWeeks[2]))
 				{
-					Node elemento = arrList[arrNode[k].get(i).valor].remove(0);
-					elemento.antecedentes--;
+					badWeeks++;
+
+					//verifica se é a pior semana
+					if (size > countWorstestWeek)
+						countWorstestWeek = size;
+				}
+				semana++;
+			}
+
+			Node atual = queue.remove();
+
+			//verifica todas as adjacencias do nó atual do grafo
+			for (Node removido : tarefasPrecedencias[atual.valor])
+			{
+				//como o primeiro elemento é sempre o primeiro no na lista de adjacencias
+				//entao esta condição tem de existir para que nao seja alterado os dados do mesmo
+				if(atual.valor != removido.valor)
+				{
+					//atualizar semana, incrementa mais uma que o antecessor
+					removido.week = atual.week + 1;
+
+					//diminuimos o numero de antecessores
+					removido.antecessor--;
+
+					//quando nao houver mais antecessores vai para a fila
+					if (removido.antecessor == 0)
+						queue.add(removido);
 				}
 			}
-		}*/
-
-		int bad_weeks = 0, count_worstest_week = 0;
-
-		for (int i = 0; i < arrNode.length && arrNode[i].size() > 0; i++)
-		{		
-			/*System.out.print("week " + (i + 1) + ": " );
-			for (int j = 0; j < arrNode[i].size(); j++)
-				System.out.print(arrNode[i].get(j).valor + "(" + (arrNode[i].get(j).week+1) +") ");
-			System.out.println();*/
-
-			if (arrNode[i].size() > Integer.parseInt(tarefas_regras_hardWeeks[2]))
-			{
-				bad_weeks++;
-
-				if (arrNode[i].size() > count_worstest_week)
-					count_worstest_week = arrNode[i].size();
-			}
 		}
-		System.out.println(count_worstest_week + " " + bad_weeks);
+		System.out.println(countWorstestWeek + " " + badWeeks);
 	}
-
-	/*public static void order(PriorityQueue<Node> queue)
-	{
-		queue.add(queue.remove());
-	}*/
 }
-
-/*class NodeComparation implements Comparator<Node>
-{
-	public int compare (Node n, Node v)
-	{
-		//Arrays.sort(queue, (a,b) -> {return a.antecedentes < b.antecedentes ? -1 : a.antecedentes > b.antecedentes ? 1 : 0;})
-		if(n.antecedentes < v.antecedentes)
-			return -1;
-		else
-			return 1;
-	}
-}*/
-
-//usar uma priority queue na linha 11 do slide 98 do powerpoint 7
-//o prof falou em heapsort
