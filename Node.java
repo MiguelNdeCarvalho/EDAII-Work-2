@@ -7,7 +7,7 @@ public class Node
 	public void setValores(int valor)
 	{
 		this.valor = valor;
-		this.week = -1;
+		this.week = 0;
 		this.antecessor = 0;
 	}
 

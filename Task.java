@@ -11,7 +11,7 @@ public class Task
 		//declarar um buffer para puder ler inputs
 		BufferedReader buffer = new BufferedReader(new InputStreamReader(System.in));
 		
-		//ler o num de tarefas existemtes, num de regras e significado de uma semana má
+		//ler o num de tarefas existentes, num de regras e significado de uma semana má
 		String[] tarefasRegrasHardWeeks = buffer.readLine().split(" ");
 
 		//limites do programa
@@ -28,7 +28,6 @@ public class Task
 		//a primeira é a lista de adjacencias representar o grafo
 		//em ultimo temos a fila
 		ArrayList<Node>[] tarefasPrecedencias = new ArrayList[Integer.parseInt(tarefasRegrasHardWeeks[0])];
-
 		Queue<Node> queue = new LinkedList<Node>();
 
 		//criação dos nós para o grafo
@@ -58,7 +57,7 @@ public class Task
 			tarefasPrecedencias[Integer.parseInt(regras[1])].get(0).antecessor++;
 		}
 
-		//verificar quais sao os nós que nao tem adjacencias e coloca na fila
+		//verificar quais sao os nós que não tem adjacencias e coloca na fila
 		for (int i = 0; i < Integer.parseInt(tarefasRegrasHardWeeks[0]); i++)
 		{
 			if (tarefasPrecedencias[i].get(0).antecessor == 0)
@@ -68,13 +67,13 @@ public class Task
 			}
 		}
 
-		int badWeeks = 0, countWorstestWeek = 0, semana = 0;
+		int badWeeks = 0, worstestWeek = 0, semana = 1;
 
 		//Wrong answer
 		//enquanto a fila nao tiver vazio vai sempre lendo o que está na fila
 		while (!queue.isEmpty())
 		{
-			//quando achar a comparação significa que existe todas as tarefas dessa semana
+			//quando achar a comparação significa que existe todas as tarefas dessa semana na fila
 			if (queue.peek().week == semana)
 			{
 				//ve quantas tarefas existem para fazer nessa semana (tamanho da queue)
@@ -82,13 +81,11 @@ public class Task
 
 				//verificar se as tarefas que existem sao maior que o numero que tem o significado de uma semana má
 				if (size > Integer.parseInt(tarefasRegrasHardWeeks[2]))
-				{
 					badWeeks++;
 
-					//verifica se é a pior semana
-					if (size > countWorstestWeek)
-						countWorstestWeek = size;
-				}
+				//verifica se é a pior semana
+				if (size > worstestWeek)
+					worstestWeek = size;
 				semana++;
 			}
 
@@ -97,22 +94,22 @@ public class Task
 			//verifica todas as adjacencias do nó atual do grafo
 			for (Node removido : tarefasPrecedencias[atual.valor])
 			{
-				//como o primeiro elemento é sempre o primeiro no na lista de adjacencias
-				//entao esta condição tem de existir para que nao seja alterado os dados do mesmo
-				if(atual.valor != removido.valor)
+				//atualizar semana para o antecessor (como o nó so vai para a fila quando todos os antecessores
+				//forem visitados entao quando for a vez do nó removido ir para a fila o ultimo antecessor é o maior
+				//pois como é uma pesquisa em largura, vimos por niveis)
+				removido.week = atual.week;
+
+				//diminuimos o numero de antecessores
+				removido.antecessor--;
+
+				//quando nao houver mais antecessores vai para a fila
+				if (removido.antecessor == 0)
 				{
-					//atualizar semana, incrementa mais uma que o antecessor
-					removido.week = atual.week + 1;
-
-					//diminuimos o numero de antecessores
-					removido.antecessor--;
-
-					//quando nao houver mais antecessores vai para a fila
-					if (removido.antecessor == 0)
-						queue.add(removido);
+					removido.week++;
+					queue.add(removido);
 				}
 			}
 		}
-		System.out.println(countWorstestWeek + " " + badWeeks);
+		System.out.println(worstestWeek + " " + badWeeks);
 	}
 }
